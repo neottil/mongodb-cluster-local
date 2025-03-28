@@ -1,0 +1,31 @@
+services:
+  mongodb1:
+    image: mongodb/mongodb-community-server:6.0.13-ubi9
+    container_name: mongodb1
+    restart: always
+    networks:
+      - mongoCluster
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb1_data:/data/db
+    command: mongod --replSet myReplicaSet --bind_ip_all
+
+  mongodb2:
+    image: mongodb/mongodb-community-server:6.0.13-ubi9
+    container_name: mongodb2
+    restart: always
+    networks:
+      - mongoCluster
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb2_data:/data/db
+    command: mongod --replSet myReplicaSet --bind_ip_all
+
+networks:
+  mongoCluster:
+
+volumes:
+  mongodb1_data:
+  mongodb2_data:
