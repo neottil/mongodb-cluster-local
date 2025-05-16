@@ -1,31 +1,69 @@
+version: "3.8"
+
 services:
-  mongodb1:
-    image: mongodb/mongodb-community-server:6.0.13-ubi9
-    container_name: mongodb1
-    restart: always
-    networks:
-      - mongoCluster
+  mongo1:
+    image: mongo:6.0
+    container_name: mongo1
     ports:
-      - "27017:27017"
+      - 27017:27017
+    command: ["mongod", "--replSet", "rs0"]
     volumes:
-      - mongodb1_data:/data/db
-    command: mongod --replSet myReplicaSet --bind_ip_all
-
-  mongodb2:
-    image: mongodb/mongodb-community-server:6.0.13-ubi9
-    container_name: mongodb2
-    restart: always
+      - mongo1_data:/data/db
     networks:
-      - mongoCluster
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongodb2_data:/data/db
-    command: mongod --replSet myReplicaSet --bind_ip_all
+      - mongo-cluster
 
-networks:
-  mongoCluster:
+  mongo2:
+    image: mongo:6.0
+    container_name: mongo2
+    ports:
+      - 27018:27017
+    command: ["mongod", "--replSet", "rs0"]
+    volumes:
+      - mongo2_data:/data/db
+    networks:
+      - mongo-cluster
+
+  mongo3:
+    image: mongo:6.0
+    container_name: mongo3
+    ports:
+      - 27019:27017
+    command: ["mongod", "--replSet", "rs0"]
+    volumes:
+      - mongo3_data:/data/db
+    networks:
+      - mongo-cluster
+
+  mongoinit:
+    image: mongo:6.0
+    container_name: mongoinit
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    entrypoint: >
+      bash -c '
+      echo "Waiting for MongoDB to start...";
+      sleep 5;
+      mongosh --host mongo1 --eval "
+        rs.initiate({
+          _id: \"rs0\",
+          members: [
+            { _id: 0, host: \"mongo1:27017\", priority: 2 },
+            { _id: 1, host: \"mongo2:27017\", priority: 1 },
+            { _id: 2, host: \"mongo3:27017\", priority: 1 }
+          ]
+        }, { force: true });
+        rs.status();
+      ";
+      '
+    networks:
+      - mongo-cluster
 
 volumes:
-  mongodb1_data:
-  mongodb2_data:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo-cluster:
