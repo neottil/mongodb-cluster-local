@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   mongo1:
-    image: mongo:6.0
+    image: mongo:8.0
     container_name: mongo1
     ports:
       - 27017:27017
@@ -13,7 +11,7 @@ services:
       - mongo-cluster
 
   mongo2:
-    image: mongo:6.0
+    image: mongo:8.0
     container_name: mongo2
     ports:
       - 27018:27017
@@ -24,7 +22,7 @@ services:
       - mongo-cluster
 
   mongo3:
-    image: mongo:6.0
+    image: mongo:8.0
     container_name: mongo3
     ports:
       - 27019:27017
@@ -35,7 +33,7 @@ services:
       - mongo-cluster
 
   mongoinit:
-    image: mongo:6.0
+    image: mongo:8.0
     container_name: mongoinit
     depends_on:
       - mongo1
@@ -59,11 +57,17 @@ services:
       '
     networks:
       - mongo-cluster
+    
+  localstack:
+    image: localstack/localstack:3.4
+    ports:
+      - 4566:4566
+      - 4510-4559:4510-4559
+
+networks:
+  mongo-cluster:
 
 volumes:
   mongo1_data:
   mongo2_data:
   mongo3_data:
-
-networks:
-  mongo-cluster:
