@@ -67,6 +67,9 @@ services:
 networks:
   mongo-cluster:
 
+networks:
+  mongo-cluster:
+
 volumes:
   mongo1_data:
   mongo2_data:
