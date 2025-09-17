@@ -4,7 +4,7 @@ services:
     container_name: mongo1
     ports:
       - 27017:27017
-    command: ["mongod", "--replSet", "rs0"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
       - mongo1_data:/data/db
     networks:
@@ -15,7 +15,7 @@ services:
     container_name: mongo2
     ports:
       - 27018:27017
-    command: ["mongod", "--replSet", "rs0"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
       - mongo2_data:/data/db
     networks:
@@ -26,7 +26,7 @@ services:
     container_name: mongo3
     ports:
       - 27019:27017
-    command: ["mongod", "--replSet", "rs0"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
       - mongo3_data:/data/db
     networks:
@@ -42,7 +42,7 @@ services:
     entrypoint: >
       bash -c '
       echo "Waiting for MongoDB to start...";
-      sleep 5;
+      sleep 15;
       mongosh --host mongo1 --eval "
         rs.initiate({
           _id: \"rs0\",
@@ -52,7 +52,7 @@ services:
             { _id: 2, host: \"mongo3:27017\", priority: 1 }
           ]
         }, { force: true });
-        rs.status();
+        printjson(rs.status());
       ";
       '
     networks:
